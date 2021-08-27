@@ -1,0 +1,474 @@
+#+STARTUP: overview
+* use-package
+#+BEGIN_SRC emacs-lisp
+  (require 'use-package)
+#+END_SRC
+** quelpa
+#+begin_src emacs-lisp
+  (use-package quelpa
+    :ensure t
+    :defer t
+    :custom
+    (quelpa-update-melpa-p nil "Don't update the MELPA git repo."))
+#+end_src
+** ese-package-quelpa
+#+begin_src emacs-lisp
+  (use-package quelpa-use-package
+    :ensure t
+    :init (setq quelpa-use-package-inhibit-loading-quelpa t))
+#+end_src
+** use-package custom-update
+To be able to update lists in /custom/
+#+BEGIN_SRC emacs-lisp
+  (use-package use-package-custom-update
+    :quelpa
+    (use-package-custom-update
+     :repo "a13/use-package-custom-update"
+     :fetcher github
+     :version original))
+#+END_SRC
+* interface tweaks
+#+BEGIN_SRC emacs-lisp :noweb yes
+  (use-package emacs
+    :ensure t
+    :config
+    (tool-bar-mode -1)
+    (menu-bar-mode -1)
+    (global-font-lock-mode 1)
+    (global-auto-revert-mode t)
+    (global-unset-key (kbd "C-x C-c"))
+    (add-to-list 'default-frame-alist '(font . "M+ 1mn-11"))
+    (when (fboundp 'set-fontset-font)
+      ;; force M+ for japanese glyphs
+      (set-fontset-font t 'han
+                        (font-spec :family "M+ 2p light")
+                        nil 'prepend))
+    <<narrow-commands>>
+    (setq-default indent-tabs-mode nil)
+    (setq show-trailing-whitespace t
+          ac-auto-show-menu 0.3
+          whitespace-style '(face tabs tab-mark trailing)
+          split-width-threshold 9999
+          inhibit-startup-screen t
+          frame-inhibit-implied-resize t
+          initial-scratch-message nil))
+#+END_SRC
+** narrow commands
+#+NAME: narrow-commands
+#+BEGIN_SRC emacs-lisp :tangle no
+  (put 'narrow-to-region 'disabled nil)
+  (put 'narrow-to-page 'disabled nil)
+#+END_SRC
+* paths
+** backups
+#+BEGIN_SRC emacs-lisp
+  (use-package files
+    :custom
+    (backup-directory-alist
+     `(("." . ,(locate-user-emacs-file "backups"))))
+    (auto-save-file-name-transforms
+     `((".*" ,(locate-user-emacs-file "backups") t)))
+    (auto-save-list-file-prefix
+     (locate-user-emacs-file "backups/")))
+#+END_SRC
+** custom
+#+BEGIN_SRC emacs-lisp
+  (use-package cus-edit
+    :after files
+    :config
+    (setf custom-file (locate-user-emacs-file "custom.el"))
+    (add-hook 'after-init-hook
+              (lambda () (load custom-file t))))
+#+END_SRC
+* evil mode
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :ensure t
+    :config
+    (evil-mode)
+    (fset 'evil-visual-update-x-selection 'ignore)
+    :custom
+    (evil-undo-system 'undo-tree)
+    (evil-search-module 'evil-search)
+    (evil-want-C-i-jump nil)
+    :custom-update
+    (evil-emacs-state-modes '(elfeed-search-mode
+                              elfeed-show-mode)))
+#+END_SRC
+** treat underscore as a part of a word (in code)
+Changing underscore to part of a word globally affects highlighting in
+text modes which leads to hiccups in message-mode. I only need
+"underscore as word" for code where I usually use snake_case
+identifiers.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'prog-mode-hook
+            (lambda () (modify-syntax-entry ?_ "w")))
+#+END_SRC
+** undo-tree
+#+begin_src emacs-lisp
+  (use-package undo-tree
+    :ensure t
+    :config (global-undo-tree-mode t))
+#+end_src
+* org
+** capture templates
+#+NAME: my-org-capture-templates
+#+BEGIN_SRC emacs-lisp :tangle no
+	org-capture-templates `(("i" "Inbox" entry  (file "inbox.org")
+				 ,(concat "* TODO %?\n"
+					  "/Entered on/ %U")))
+#+END_SRC
+** modules
+#+NAME: my-org-modules
+#+BEGIN_SRC emacs-lisp :tangle no
+  (add-to-list 'org-modules 'org-habit)
+#+END_SRC
+*** org-habits custom
+#+NAME: org-habits-custom
+#+BEGIN_SRC emacs-lisp :tangle no
+  (org-habit-graph-column 80)
+#+END_SRC
+*** vimacs narrow-to-subtree
+#+name: vimacs/subtree
+#+BEGIN_SRC emacs-lisp :tangle no
+  (defun vimacs/org-narrow-to-subtree ()
+    (interactive)
+    (let ((org-indirect-buffer-display 'current-window))
+      (if (not (boundp 'org-indirect-buffer-file-name))
+          (let ((above-buffer (current-buffer))
+                (org-filename (buffer-file-name)))
+            (org-tree-to-indirect-buffer (1+ (org-current-level)))
+            (setq-local org-indirect-buffer-file-name org-filename)
+            (setq-local org-indirect-above-buffer above-buffer))
+        (let ((above-buffer (current-buffer))
+              (org-filename org-indirect-buffer-file-name))
+          (org-tree-to-indirect-buffer (1+ (org-current-level)))
+          (setq-local org-indirect-buffer-file-name org-filename)
+          (setq-local org-indirect-above-buffer above-buffer)))))
+
+  (defun vimacs/org-widen-from-subtree ()
+    (interactive)
+    (let ((above-buffer org-indirect-above-buffer)
+          (org-indirect-buffer-display 'current-window))
+      (kill-buffer)
+      (switch-to-buffer above-buffer)))
+#+END_SRC
+** use package
+#+BEGIN_SRC emacs-lisp :noweb yes
+(use-package org
+  :init
+  (setq org-agenda-tags-todo-honor-ignore-options t
+	org-agenda-todo-ignore-time-comparison-use-seconds t
+	org-agenda-todo-ignore-timestamp 'future
+	org-agenda-todo-ignore-scheduled 'future
+	org-hide-emphasis-markers t
+	org-log-done t
+	org-clock-persist 'history
+	org-modules '(ol-bbdb ol-bibtex ol-docview ol-eww org-habit ol-info ol-mhe ol-w3m)
+	org-directory "~/org"
+	org-agenda-files (list org-directory)
+	org-capture-templates `(("i" "Inbox" entry  (file "inbox.org")
+				 ,(concat "* TODO %?\n"
+					  "/Entered on/ %U")))
+	org-refile-targets '((nil :maxlevel . 9)
+			     (org-agenda-files :maxlevel . 9))
+	org-outline-path-complete-in-steps nil
+	org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)" "HOLD(h)" "CANCELLED(c)")
+			    (sequence "IDEA(i)" "PROJ(p)" "|" "WIN(w)")))
+  (defun org-capture-inbox ()
+    (interactive)
+    (call-interactively 'org-store-link)
+    (org-capture nil "i"))
+ :bind
+  (("C-c l" . org-store-link)
+   ("C-c a" . org-agenda)
+   ("C-c c" . org-capture)
+   ("C-c i" . org-capture-inbox))
+ :config
+ (org-clock-persistence-insinuate)
+ (add-to-list 'auto-mode-alist '("\\.org$" . org-mode)))
+#+END_SRC
+** calendar
+#+BEGIN_SRC emacs-lisp
+  (use-package calendar
+    :ensure nil
+    :commands (calendar)
+    :custom (calendar-week-start-day 1))
+#+END_SRC
+** evil
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'org-capture-mode-hook 'evil-insert-state)
+
+  (use-package evil-org
+    :ensure t
+    :after org
+    :config
+    (add-hook 'org-mode-hook 'evil-org-mode)
+    (add-hook 'evil-org-mode-hook
+              (lambda ()
+                (evil-org-set-key-theme)))
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
+#+END_SRC
+** checklist
+#+BEGIN_SRC emacs-lisp
+  (require 'org-checklist)
+#+END_SRC
+** auto-close archive
+Automatically close archive file after archiving a subtree
+Unless it was open before archiving
+#+BEGIN_SRC emacs-lisp
+  (defun aragaer/auto-close-archive (orig-func &rest r)
+    (let* ((location (org-archive--compute-location org-archive-location))
+           (afile (car location))
+           (abuffer (get-file-buffer afile)))
+      (apply orig-func r)
+      (when (not abuffer)
+        (let ((abuffer (get-file-buffer afile)))
+          (save-some-buffers t abuffer)
+          (kill-buffer abuffer)))))
+
+  (advice-add 'org-archive-subtree :around #'aragaer/auto-close-archive)
+#+END_SRC
+
+Also close all agenda files that were opened when updating org-id locations.
+#+begin_src emacs-lisp
+  (defun aragaer/close-after-id-update (orig-func &rest r)
+    (let ((to-close (seq-remove #'get-file-buffer (org-agenda-files t org-id-search-archives))))
+      (apply orig-func r)
+      (mapcar (lambda (f) (kill-buffer (get-file-buffer f))) to-close)))
+
+  (advice-add 'org-id-update-id-locations :around #'aragaer/close-after-id-update)
+#+end_src
+** reopen "nohide" blocks
+I want my 'src' blocks to be hidden by default but their results
+wrapped in blocks should be visible. For that I use ':wrap nohide'.
+#+begin_src emacs-lisp
+  (defun aragaer/show-nohide (&rest r)
+    (let* ((e (org-element-at-point))
+           (subtype (org-element-property :type e)))
+      (when (equal subtype "nohide")
+        (org-hide-block-toggle nil t e))))
+
+  (advice-add
+   'org-hide-block-all
+   :after
+   (lambda (&rest r) (org-block-map #'aragaer/show-nohide))
+   '((name . "show-nohide")))
+#+end_src
+* org-super-agenda
+#+BEGIN_SRC emacs-lisp :noweb yes
+(use-package org-super-agenda
+  :after org-agenda
+  :init
+  (setq org-agenda-skip-scheduled-if-done t
+      org-agenda-skip-deadline-if-done t
+      org-agenda-include-deadlines t
+      org-agenda-block-separator t 
+      org-agenda-compact-blocks t
+      org-agenda-span 1
+      org-agenda-start-on-weekday nil
+      org-agenda-todo-ignore-deadlines 'all)
+
+  (setq org-agenda-custom-commands
+        '(("j" "Jedi tasklist"
+           ((agenda "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          '((:name "Habits"
+                                   :habit t)
+			    (:name "Deadlines"
+				   :deadline past
+				   :deadline today
+				   :deadline future)
+                            (:discard (:anything t))))))
+            (todo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          '((:name "Next to do"
+                                   :and (:todo "TODO"
+				   :not (:tag "inbox")))
+                            (:discard (:anything t))))))))
+	  ("p" "Projects"
+           ((search "Proj" ((org-agenda-overriding-header "Current projects")
+			(org-super-agenda-groups
+			 '((:name "Auto priority"
+				  :auto-priority "A")
+			   (:discard (:anything t))))
+			))
+	    ))))
+  :config
+  (org-super-agenda-mode))
+  #+END_SRC
+* utils
+** which-key
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :ensure t
+    :config
+    (which-key-mode))
+#+END_SRC
+** reverse-im
+#+BEGIN_SRC emacs-lisp
+  (use-package reverse-im
+    :ensure t
+    :demand t
+    :bind
+    ("M-T" . reverse-im-translate-word)
+    :custom
+    (reverse-im-char-fold t)
+    (reverse-im-read-char-advice-function #'reverse-im-read-char-include)
+    (reverse-im-read-char-exclude-commands
+      '())
+    (reverse-im-input-methods '("russian-computer"))
+    :config
+    (reverse-im-mode t))
+#+END_SRC
+** org-journal
+#+begin_src emacs-lisp
+  (use-package org-journal
+    :ensure t
+    :defer t
+    :bind
+    (("C-c j" . org-journal-new-entry)
+     ("C-c J" . org-journal-new-scheduled-entry))
+    :init
+    ;; Change default prefix key; needs to be set before loading org-journal
+    (setq org-journal-prefix-key "C-c j")
+    :config
+    (setq org-journal-dir "~/roam/daily"
+          org-journal-file-format "journal-%Y-%m-%d.org")
+    :custom
+    (org-journal-file-type 'weekly)
+    (org-journal-date-format "%A, %Y-%m-%d")
+    (org-journal-start-on-weekday 7)
+    (org-journal-hide-entries-p t)
+    (org-journal-enable-agenda-integration t)
+    (org-journal-file-header (lambda (time) "#+startup: overview\n#+startup: shrink\n#+category: journal\n")))
+
+  (defun org-journal-find-location ()
+    ;; Open today's journal, but specify a non-nil prefix argument in order to
+    ;; inhibit inserting the heading; org-capture will insert the heading.
+    (org-journal-new-entry t)
+    ;; Position point on the journal's top-level heading so that org-capture
+    ;; will add the new entry as a child entry.
+    (goto-char (point-min)))
+
+  (defvar org-journal--date-location-scheduled-time nil)
+
+  (defun org-journal-date-location (&optional scheduled-time)
+    (let ((scheduled-time (or scheduled-time (org-read-date nil nil nil "Date:"))))
+      (setq org-journal--date-location-scheduled-time scheduled-time)
+      (org-journal-new-entry t (org-time-string-to-time scheduled-time))
+      (goto-char (point-max))))
+#+end_src
+** emacs-everywhere
+#+begin_src emacs-lisp
+  (use-package emacs-everywhere
+    :ensure t)
+#+end_src
+** org-roam
+#+begin_src emacs-lisp
+  (setq org-roam-v2-ack t)
+  (use-package org-roam
+    :ensure t
+    :hook
+    (after-init . org-roam-setup)
+    :custom
+    (org-roam-directory (file-truename "~/roam"))
+    (org-roam-db-update-method 'immediate)
+    :bind ((("C-c n l" . org-roam-buffer-toggle)
+            ("C-c n c" . org-roam-capture)
+            ("C-c n f" . org-roam-node-find))
+           :map org-mode-map
+           (("C-c n i" . org-roam-node-insert))))
+#+end_src
+* helpers
+** hledger
+#+BEGIN_SRC emacs-lisp
+  (defun hledger-account-read ()
+    (interactive)
+    (insert (completing-read
+             "account: " (split-string (shell-command-to-string "hledger a") "\n" t)))
+    (insert "  "))
+#+END_SRC
+* modes
+** olivetti
+#+BEGIN_SRC emacs-lisp
+  (use-package olivetti
+    :ensure t)
+#+END_SRC
+** feature-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package feature-mode
+    :ensure t)
+#+END_SRC
+** my-writing-mode
+#+BEGIN_SRC emacs-lisp
+  (define-derived-mode my-writing-mode org-mode "my-writing"
+    (setq olivetti-body-width 120)
+    (olivetti-mode t))
+#+END_SRC
+** hooks
+*** prog-mode
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'prog-mode-hook 'whitespace-mode)
+#+END_SRC
+*** golang
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'go-mode-hook '(lambda ()
+                             (setq indent-tabs-mode t)
+                             (setq tab-width 4)))
+#+END_SRC
+*** octave
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.m$" . octave-mode))
+#+END_SRC
+*** changelog
+#+BEGIN_SRC emacs-lisp
+  (rassq-delete-all 'change-log-mode auto-mode-alist)
+#+END_SRC
+* telega
+#+BEGIN_SRC emacs-lisp
+  (defun my-telega-ins--sticker-image (orig-fun &rest args)
+    (let ((telega-use-images nil))
+      (apply orig-fun args)))
+
+  (defun telega/ignore-chatbuf (str)
+    (let ((buf (get-buffer str)))
+      (and buf (fboundp 'telega-buffer-p) (telega-buffer-p buf))))
+
+  (with-eval-after-load 'ivy
+    (add-to-list 'ivy-ignore-buffers #'telega/ignore-chatbuf))
+
+  (use-package telega
+    :ensure t
+    :bind
+    (:map mode-specific-map
+          :prefix-map telega-map
+          :prefix "t"
+          ("t" . telega)
+          ("c" . telega-chat-with))
+    :custom
+    (telega-use-images t)
+    (telega-completing-read-function #'ivy-completing-read)
+    (telega-symbol-msg-succeeded "-")
+    (telega-symbol-msg-viewed "+")
+    (telega-chat--display-buffer-action
+     '((display-buffer-reuse-window display-buffer-use-some-window)))
+    :custom-face
+    (telega-chat-inline-reply ((t (:inherit 'font-lock-comment-face))))
+    (telega-chat-user-title ((t (:inherit 'font-lock-function-name-face))))
+    (telega-chat-timestamp ((t (:inherit 'org-agenda-date))))
+    (telega-msg-status ((t (:inherit 'font-lock-constant-face))))
+    :config
+    (setq telega-server-libs-prefix
+          (expand-file-name "~/.local/td"))
+    (advice-add 'telega-ins--sticker-image :around
+                'my-telega-ins--sticker-image)
+    :commands (telega)
+    :defer t)
+#+END_SRC
+* config
+** browser
+#+BEGIN_SRC emacs-lisp
+  (setq browse-url-browser-function 'browse-url-generic browse-url-generic-program "google-chrome-stable")
+#+END_SRC

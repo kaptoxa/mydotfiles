@@ -36,13 +36,11 @@ To be able to update lists in /custom/
     (menu-bar-mode -1)
     (global-font-lock-mode 1)
     (global-auto-revert-mode t)
+    (global-set-key (kbd "C-x k") 'windmove-up)
+    (global-set-key (kbd "C-x j") 'windmove-down)
+    (global-set-key (kbd "C-x h") 'windmove-left)
+    (global-set-key (kbd "C-x l") 'windmove-right)
     (global-unset-key (kbd "C-x C-c"))
-    (add-to-list 'default-frame-alist '(font . "M+ 1mn-11"))
-    (when (fboundp 'set-fontset-font)
-      ;; force M+ for japanese glyphs
-      (set-fontset-font t 'han
-                        (font-spec :family "M+ 2p light")
-                        nil 'prepend))
     <<narrow-commands>>
     (setq-default indent-tabs-mode nil)
     (setq show-trailing-whitespace t
@@ -114,9 +112,9 @@ identifiers.
 ** capture templates
 #+NAME: my-org-capture-templates
 #+BEGIN_SRC emacs-lisp :tangle no
-	org-capture-templates `(("i" "Inbox" entry  (file "inbox.org")
-				 ,(concat "* TODO %?\n"
-					  "/Entered on/ %U")))
+  (org-capture-templates `(("i" "Inbox" entry  (file "inbox.org")
+                            ,(concat "* TODO %?\n"
+                                            "/Entered on/ %U"))))
 #+END_SRC
 ** modules
 #+NAME: my-org-modules
@@ -126,7 +124,36 @@ identifiers.
 *** org-habits custom
 #+NAME: org-habits-custom
 #+BEGIN_SRC emacs-lisp :tangle no
-  (org-habit-graph-column 80)
+  (org-habit-graph-column 50)
+#+END_SRC
+*** agenda custom
+#+NAME: agenda-custom
+#+BEGIN_SRC emacs-lisp :tangle no
+  (org-agenda-span 1)
+  (org-sort-agenda-notime-is-late nil)
+  (org-agenda-tags-todo-honor-ignore-options t)
+  (org-agenda-todo-ignore-time-comparison-use-seconds t)
+  (оrg-agenda-todo-ignore-timestamp 'future)
+  (org-agenda-todo-ignore-scheduled 'future)
+  (org-agenda-custom-commands
+      '(("j" "Jedi task list"
+         ((todo "NEXT"
+                 ((org-agenda-prefix-format "  %-12:c")
+                 (org-agenda-overriding-header "\nNext to do")
+                 (org-agenda-max-entries 5)))
+          (agenda ""
+               ((org-agenda-priority-down)
+                (org-agenda-toggle-time-grid)
+                (org-agenda-skip-scheduled-if-done t)
+               ))))
+        ("d" "Jedi day review"
+            ((tags "Closed>=\"<today>\""
+                      ((org-agenda-prefix-format "  %?-12t% s")
+                      (org-agenda-overriding-header "Done")))
+            (todo "PROJ"
+                    ((org-agenda-prefix-format "  %?-12t% s")
+                    (org-agenda-overriding-header "Projects")))))
+        ))
 #+END_SRC
 *** vimacs narrow-to-subtree
 #+name: vimacs/subtree
@@ -145,48 +172,79 @@ identifiers.
           (org-tree-to-indirect-buffer (1+ (org-current-level)))
           (setq-local org-indirect-buffer-file-name org-filename)
           (setq-local org-indirect-above-buffer above-buffer)))))
-
   (defun vimacs/org-widen-from-subtree ()
     (interactive)
     (let ((above-buffer org-indirect-above-buffer)
           (org-indirect-buffer-display 'current-window))
       (kill-buffer)
       (switch-to-buffer above-buffer)))
-#+END_SRC
-** use package
-#+BEGIN_SRC emacs-lisp :noweb yes
-(use-package org
-  :init
-  (setq org-agenda-tags-todo-honor-ignore-options t
-	org-agenda-todo-ignore-time-comparison-use-seconds t
-	org-agenda-todo-ignore-timestamp 'future
-	org-agenda-todo-ignore-scheduled 'future
-	org-hide-emphasis-markers t
-	org-log-done t
-	org-clock-persist 'history
-	org-modules '(ol-bbdb ol-bibtex ol-docview ol-eww org-habit ol-info ol-mhe ol-w3m)
-	org-directory "~/org"
-	org-agenda-files (list org-directory)
-	org-capture-templates `(("i" "Inbox" entry  (file "inbox.org")
-				 ,(concat "* TODO %?\n"
-					  "/Entered on/ %U")))
-	org-refile-targets '((nil :maxlevel . 9)
-			     (org-agenda-files :maxlevel . 9))
-	org-outline-path-complete-in-steps nil
-	org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)" "HOLD(h)" "CANCELLED(c)")
-			    (sequence "IDEA(i)" "PROJ(p)" "|" "WIN(w)")))
   (defun org-capture-inbox ()
     (interactive)
     (call-interactively 'org-store-link)
     (org-capture nil "i"))
- :bind
+#+END_SRC
+** bind
+#+NAME: org-bind-keys
+#+BEGIN_SRC emacs-lisp :tangle no
   (("C-c l" . org-store-link)
    ("C-c a" . org-agenda)
    ("C-c c" . org-capture)
    ("C-c i" . org-capture-inbox))
- :config
- (org-clock-persistence-insinuate)
- (add-to-list 'auto-mode-alist '("\\.org$" . org-mode)))
+#+END_SRC
+** after init hook
+#+name: org-after-init
+#+begin_src emacs-lisp :tangle no
+  (setq org-startup-indented t)
+  (define-key org-mode-map (kbd "<C-tab>") 'vimacs/org-narrow-to-subtree)
+  (define-key org-mode-map (kbd "<M-tab>") 'vimacs/org-widen-from-subtree)
+#+end_src
+** use package
+#+BEGIN_SRC emacs-lisp :noweb yes
+  (use-package org
+    :ensure org-plus-contrib
+    :init
+    <<vimacs/subtree>>
+    :bind
+    <<org-bind-keys>>
+    :mode ("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode)
+    :init
+    (setq org-hide-emphasis-markers t
+          org-log-done t
+          org-clock-persist 'history
+          org-directory "~/org"
+          org-agenda-files (list org-directory)
+          org-outline-path-complete-in-steps nil
+          org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)" "HOLD(h)" "CANCELLED(c)")
+                              (sequence "IDEA(i)" "PROJ(p)" "|" "WIN(w)")))
+    (add-hook 'after-init-hook (defun org-after-init ()
+                                 <<org-after-init>>))
+    <<my-org-modules>>
+    :config
+    (add-to-list 'org-todo-keyword-faces
+                 '("CANCELLED" . (:foreground "blue" :weight bold)))
+    (org-load-modules-maybe t)
+    (unbind-key "C-'" org-mode-map) ; Free this one for avy
+    :custom
+    <<org-habits-custom>>
+    <<agenda-custom>>
+    <<my-org-capture-templates>>
+    (org-use-sub-superscripts nil)
+    (org-blank-before-new-entry '((heading . nil) (plain-list-item . nil)))
+    (org-confirm-babel-evaluate nil)
+    (org-enforce-todo-dependencies t)
+    (org-extend-today-until 3)
+    (org-hide-leading-stars t)
+    (org-log-into-drawer "LOGBOOK")
+    (org-outline-path-complete-in-steps nil)
+    (org-refile-use-outline-path 'file)
+    (org-archive-location "archive/%s::")
+    (org-return-follows-link t)
+    (org-hide-blocks-startup t)
+    (org-refile-targets
+     '((nil :maxlevel . 3)
+       (org-agenda-files :maxlevel . 3)))
+    :custom-face
+    (org-mode-line-clock ((t (:background "grey75" :foreground "red" :box (:line-width -1 :style released-button))))))
 #+END_SRC
 ** calendar
 #+BEGIN_SRC emacs-lisp
@@ -256,48 +314,6 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
    (lambda (&rest r) (org-block-map #'aragaer/show-nohide))
    '((name . "show-nohide")))
 #+end_src
-* org-super-agenda
-#+BEGIN_SRC emacs-lisp :noweb yes
-(use-package org-super-agenda
-  :after org-agenda
-  :init
-  (setq org-agenda-skip-scheduled-if-done t
-      org-agenda-skip-deadline-if-done t
-      org-agenda-include-deadlines t
-      org-agenda-block-separator t 
-      org-agenda-compact-blocks t
-      org-agenda-span 1
-      org-agenda-start-on-weekday nil
-      org-agenda-todo-ignore-deadlines 'all)
-
-  (setq org-agenda-custom-commands
-        '(("j" "Jedi tasklist"
-           ((agenda "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups
-                          '((:name "Habits"
-                                   :habit t)
-			    (:name "Deadlines"
-				   :deadline past
-				   :deadline today
-				   :deadline future)
-                            (:discard (:anything t))))))
-            (todo "" ((org-agenda-overriding-header "")
-                         (org-super-agenda-groups
-                          '((:name "Next to do"
-                                   :and (:todo "TODO"
-				   :not (:tag "inbox")))
-                            (:discard (:anything t))))))))
-	  ("p" "Projects"
-           ((search "Proj" ((org-agenda-overriding-header "Current projects")
-			(org-super-agenda-groups
-			 '((:name "Auto priority"
-				  :auto-priority "A")
-			   (:discard (:anything t))))
-			))
-	    ))))
-  :config
-  (org-super-agenda-mode))
-  #+END_SRC
 * utils
 ** which-key
 #+BEGIN_SRC emacs-lisp
@@ -305,6 +321,25 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
     :ensure t
     :config
     (which-key-mode))
+#+END_SRC
+** vdiff
+#+BEGIN_SRC emacs-lisp
+  (use-package vdiff
+    :ensure t
+    :custom
+    (vdiff-truncate-lines t)
+    :config
+    (define-key vdiff-mode-map (kbd "C-c") vdiff-mode-prefix-map)
+    (evil-define-key 'normal vdiff-mode-map "," vdiff-mode-prefix-map))
+#+END_SRC
+** ivy
+#+BEGIN_SRC emacs-lisp
+    (use-package ivy
+      :ensure t
+      :config
+      (ivy-mode t)
+      (setq ivy-use-virtual-buffers t)
+      (setq ivy-count-format "(%d/%d) "))
 #+END_SRC
 ** reverse-im
 #+BEGIN_SRC emacs-lisp
@@ -321,6 +356,22 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
     (reverse-im-input-methods '("russian-computer"))
     :config
     (reverse-im-mode t))
+#+END_SRC
+** magit
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :ensure t
+    :bind (("C-c g" . magit-status))
+    :custom
+    (magit-log-margin '(t age-abbreviated magit-log-margin-width t 7))
+    :init
+    (require 'magit-git)
+    (require 'magit-process))
+#+END_SRC
+** epa-file
+#+BEGIN_SRC emacs-lisp
+  (use-package epa-file
+    :config (epa-file-enable))
 #+END_SRC
 ** org-journal
 #+begin_src emacs-lisp
@@ -360,6 +411,17 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
       (org-journal-new-entry t (org-time-string-to-time scheduled-time))
       (goto-char (point-max))))
 #+end_src
+** project.el
+#+begin_src emacs-lisp
+  (use-package project
+  :ensure t
+  :bind-keymap
+  ("C-c p" . project-prefix-map)
+  :config
+  (setq project-switch-commands
+        '((?f "Find file" project-find-file)
+          (?g "Magit status" magit-status))))
+#+end_src
 ** emacs-everywhere
 #+begin_src emacs-lisp
   (use-package emacs-everywhere
@@ -381,6 +443,13 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
            :map org-mode-map
            (("C-c n i" . org-roam-node-insert))))
 #+end_src
+** org-transclude
+#+begin_src emacs-lisp
+(use-package org-transclusion
+    :defer t
+    :quelpa
+    (org-transclusion :repo "nobiot/org-transclusion" :fetcher github))
+#+end_src
 * helpers
 ** hledger
 #+BEGIN_SRC emacs-lisp
@@ -390,12 +459,19 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
              "account: " (split-string (shell-command-to-string "hledger a") "\n" t)))
     (insert "  "))
 #+END_SRC
-* modes
-** olivetti
+** google translate
 #+BEGIN_SRC emacs-lisp
-  (use-package olivetti
-    :ensure t)
+(require 'popup)
+(require 'google-translate)
+(require 'google-translate-default-ui)
+(global-set-key "\C-ct" 'google-translate-at-point)
+(global-set-key "\C-cT" 'google-translate-query-translate)
+(setq google-translate-default-source-language "en")
+(setq google-translate-default-target-language "ru")
+(defun google-translate--search-tkk () "Search TKK." (list 430675 2721866130))
+(setq google-translate-backend-method 'curl)
 #+END_SRC
+* modes
 ** feature-mode
 #+BEGIN_SRC emacs-lisp
   (use-package feature-mode
@@ -425,50 +501,4 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
 *** changelog
 #+BEGIN_SRC emacs-lisp
   (rassq-delete-all 'change-log-mode auto-mode-alist)
-#+END_SRC
-* telega
-#+BEGIN_SRC emacs-lisp
-  (defun my-telega-ins--sticker-image (orig-fun &rest args)
-    (let ((telega-use-images nil))
-      (apply orig-fun args)))
-
-  (defun telega/ignore-chatbuf (str)
-    (let ((buf (get-buffer str)))
-      (and buf (fboundp 'telega-buffer-p) (telega-buffer-p buf))))
-
-  (with-eval-after-load 'ivy
-    (add-to-list 'ivy-ignore-buffers #'telega/ignore-chatbuf))
-
-  (use-package telega
-    :ensure t
-    :bind
-    (:map mode-specific-map
-          :prefix-map telega-map
-          :prefix "t"
-          ("t" . telega)
-          ("c" . telega-chat-with))
-    :custom
-    (telega-use-images t)
-    (telega-completing-read-function #'ivy-completing-read)
-    (telega-symbol-msg-succeeded "-")
-    (telega-symbol-msg-viewed "+")
-    (telega-chat--display-buffer-action
-     '((display-buffer-reuse-window display-buffer-use-some-window)))
-    :custom-face
-    (telega-chat-inline-reply ((t (:inherit 'font-lock-comment-face))))
-    (telega-chat-user-title ((t (:inherit 'font-lock-function-name-face))))
-    (telega-chat-timestamp ((t (:inherit 'org-agenda-date))))
-    (telega-msg-status ((t (:inherit 'font-lock-constant-face))))
-    :config
-    (setq telega-server-libs-prefix
-          (expand-file-name "~/.local/td"))
-    (advice-add 'telega-ins--sticker-image :around
-                'my-telega-ins--sticker-image)
-    :commands (telega)
-    :defer t)
-#+END_SRC
-* config
-** browser
-#+BEGIN_SRC emacs-lisp
-  (setq browse-url-browser-function 'browse-url-generic browse-url-generic-program "google-chrome-stable")
 #+END_SRC

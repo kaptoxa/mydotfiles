@@ -1,1 +1,1 @@
-(https://github.com/kaptoxa/mydotfiles/blob/main/myinit.org)[My init org file]
+[My init org file](https://github.com/kaptoxa/mydotfiles/blob/main/myinit.org)

@@ -1,1 +1,1 @@
-C:/Users/user/.emacs.d/myinit.org
+https://github.com/kaptoxa/mydotfiles/blob/main/myinit.org

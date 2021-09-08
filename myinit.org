@@ -390,20 +390,22 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
 #+end_src
 ** org-pomodoro
 #+begin_src emacs-lisp
-          (use-package org-pomodoro
-            :ensure t
-            :config
-            (defun org-pomodoro-notify (title message)
-              "Temporary replacement for function of the same name
-    which uses the buggy alert.el package.  TITLE is the title of the
-    MESSAGE."
-              (let*
-                    ((toast "toast")
-                    (t-title (concat " -t \"" title))
-                    (t-message (concat "\" -m \"" message "\""))
-                    (t-image (concat " -p \"C:\\Program Files\\emacs\\x86_64\\share\\icons\\hicolor\\128x128\\apps\\emacs.png\""))
-                    (my-command (concat toast t-title t-message t-image)))
-                (call-process-shell-command my-command))))
+        (use-package org-pomodoro
+          :ensure t
+          :bind
+          ("C-c C-x C-i" . org-pomodoro)
+          :config
+          (defun org-pomodoro-notify (title message)
+            "Temporary replacement for function of the same name
+  which uses the buggy alert.el package.  TITLE is the title of the
+  MESSAGE."
+            (let*
+                  ((toast "toast")
+                  (t-title (concat " -t \"" title))
+                  (t-message (concat "\" -m \"" message "\""))
+                  (t-image (concat " -p \"C:\\Program Files\\emacs\\x86_64\\share\\icons\\hicolor\\128x128\\apps\\emacs.png\""))
+                  (my-command (concat toast t-title t-message t-image)))
+              (call-process-shell-command my-command))))
 #+end_src
 
 * modes

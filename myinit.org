@@ -362,14 +362,6 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
     (org-download-heading-lvl 3))
 #+end_src
 * helpers
-** hledger
-#+BEGIN_SRC emacs-lisp
-  (defun hledger-account-read ()
-    (interactive)
-    (insert (completing-read
-             "account: " (split-string (shell-command-to-string "hledger a") "\n" t)))
-    (insert "  "))
-#+END_SRC
 ** google translate
 #+BEGIN_SRC emacs-lisp
 (require 'popup)

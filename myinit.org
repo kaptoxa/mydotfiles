@@ -184,6 +184,20 @@ identifiers.
     <<org-bind-keys>>
     :mode ("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode)
     :init
+    (setq org-publish-project-alist
+      '(("org"
+         :base-directory "~/roam/"
+         :publishing-function org-html-publish-to-html
+         :publishing-directory "~/kaptoxa.github.io/"
+         :section-numbers nil
+         :with-toc 2
+         :headline-levels 1
+         :viewport nil
+         :with-date nil
+         :with-author nil
+         :style "<link rel=\"stylesheet\"
+                href=\"style.css\"
+                type=\"text/css\"/>")))
     (setq org-hide-emphasis-markers t
           org-log-done t
           org-clock-persist 'history
@@ -328,34 +342,97 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
   (use-package emacs-everywhere
     :ensure t)
 #+end_src
-** org-roam
+** helpers
+Emacs lisp helper functions.
+
+Timestamp-ids are used to uniquely identify things.
 #+begin_src emacs-lisp
-  (use-package org-roam
-    :ensure t
-    :init
-    (setq org-roam-v2-ack t)
-    (setq org-roam-dailies-capture-templates
-      '(("d" "default" entry
-         "* %?"
-         :if-new (file+head "%<%Y-%m-%d>.org"
-                            "#+title: %<%Y-%m-%d>\n"))))
+(defun tsid (&optional time)
+  "Return timestamp-id."
+  (format-time-string "%Y%m%d%H%M%S" time "UTC"))
+#+end_src
+** org-roam
+#+begin_src emacs-lisp :noweb yes
+    (use-package org-roam
+      :ensure t
+      :init
+      (setq org-roam-v2-ack t)
+      (setq org-roam-dailies-capture-templates
+        '(("d" "default" entry
+           "* %?"
+           :if-new (file+head "%<%Y-%m-%d>.org"
+                              "#+title: %<%Y-%m-%d>\n"))))
+  ;    (setq org-roam-capture-templates
+  ;        '(("d" "default" plain
+  ;           "%?"
+  ;           :if-new (file+head "%<%Y%m%d%H%M%S>.org" "#+title: ${title}")
+  ;
+  ;           :unnarrowed t)))
+      :config
+      (setq org-roam-directory (file-truename "~/roam"))
+      (setq org-roam-dailes-directory (file-truename "~/roam/daily/"))
+      <<org-roam-slip-boxes>>
+      :hook
+      (after-init . org-roam-setup)
+      :custom
+      (org-roam-db-update-method 'immediate)
+      :bind ((("C-c n l" . org-roam-buffer-toggle)
+              ("C-c n c" . org-roam-capture)
+              ("C-c n f" . org-roam-node-find)
+              ("C-c n n" . org-roam-new-node)
+              ("C-c n d" . org-roam-new-node-default)
+              ("C-c n a" . org-roam-new-node-areas)
+              ("C-c n j" . org-roam-dailies-capture-today))
+             :map org-mode-map
+             (("C-c n i" . org-roam-node-insert)
+              )))
+#+end_src
+** org-roam-slip-boxes
+#+name: org-roam-slip-boxes
+#+begin_src emacs-lisp :tangle no
+    (defconst slip-boxes
+      '(;; Default slip-box with permanent notes
+        ("d" "default"     ""         "${capture-tsid}")
+        ;; Areas of responsibility notes
+        ("a" "areas"        "areas/"    "${capture-tsid}")
+        ;; Literature notes
+        ("b" "bibliograpic" "biblio/" "${citekey}" "#+LAST_MODIFIED: \n#+DATE: %<%Y-%m-%d>\n"))
+      "My slip boxes. Format is a list of (capture-key name directory filename extra-template).")
+    ;; one capture template per slip-box
     (setq org-roam-capture-templates
-        '(("d" "default" plain "%?" :target
-            (file+head "%<%Y%m%d%H%M%S>.org" "#+title: ${title}")
-            :unnarrowed t)))
-    :hook
-    (after-init . org-roam-setup)
-    :custom
-    (org-roam-directory (file-truename "~/roam"))
-    (org-roam-dailes-directory (file-truename "~/roam/daily/"))
-    (org-roam-db-update-method 'immediate)
-    :bind ((("C-c n l" . org-roam-buffer-toggle)
-            ("C-c n c" . org-roam-capture)
-            ("C-c n f" . org-roam-node-find)
-            ("C-c n j" . org-roam-dailies-capture-today))
-           :map org-mode-map
-           (("C-c n i" . org-roam-node-insert)
-            )))
+          (mapcar (lambda (x)
+                    (let ((key  (nth 0 x))
+                          (name (nth 1 x))
+                          (dir  (nth 2 x))
+                          (filename (nth 3 x))
+                          (extra-template (nth 4 x)))
+                      `(,key ,name plain "%?"
+                             :if-new (file+head
+                                      ,(concat dir filename ".org")
+                                      ,(concat "#+TITLE: ${title}\n"
+                                               extra-template))
+                             :immediate-finish t
+                             :unnarrowed t)))
+                  slip-boxes))
+    
+    (defun capture-tsid (node)
+      "A hack definition to workaround that org-roam passes a node argument."
+      (tsid))
+    
+    (defun org-roam-new-node (&optional keys)
+    (interactive)
+    (org-roam-capture-
+     :keys keys
+     :node (org-roam-node-create :title "")
+     :props '(:finalize find-file)))
+  
+  (defun org-roam-new-node-default ()
+    (interactive)
+    (org-roam-new-node "d"))
+  
+  (defun org-roam-new-node-areas ()
+    (interactive)
+    (org-roam-new-node "a"))
 #+end_src
 ** org-download
 #+begin_src emacs-lisp

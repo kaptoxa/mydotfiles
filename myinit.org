@@ -390,49 +390,97 @@ Timestamp-ids are used to uniquely identify things.
 ** org-roam-slip-boxes
 #+name: org-roam-slip-boxes
 #+begin_src emacs-lisp :tangle no
-    (defconst slip-boxes
-      '(;; Default slip-box with permanent notes
-        ("d" "default"     ""         "${capture-tsid}")
-        ;; Areas of responsibility notes
-        ("a" "areas"        "areas/"    "${capture-tsid}")
-        ;; Literature notes
-        ("b" "bibliograpic" "biblio/" "${citekey}" "#+LAST_MODIFIED: \n#+DATE: %<%Y-%m-%d>\n"))
-      "My slip boxes. Format is a list of (capture-key name directory filename extra-template).")
-    ;; one capture template per slip-box
-    (setq org-roam-capture-templates
-          (mapcar (lambda (x)
-                    (let ((key  (nth 0 x))
-                          (name (nth 1 x))
-                          (dir  (nth 2 x))
-                          (filename (nth 3 x))
-                          (extra-template (nth 4 x)))
-                      `(,key ,name plain "%?"
-                             :if-new (file+head
-                                      ,(concat dir filename ".org")
-                                      ,(concat "#+TITLE: ${title}\n"
-                                               extra-template))
-                             :immediate-finish t
-                             :unnarrowed t)))
-                  slip-boxes))
+      (defconst slip-boxes
+        '(;; Default slip-box with permanent notes
+          ("d" "default"     ""         "${capture-tsid}")
+          ;; Areas of responsibility notes
+          ("a" "areas"        "areas/"    "${capture-tsid}")
+          ;; Literature notes
+          ("b" "bibliograpic" "biblio/" "${citekey}" "#+LAST_MODIFIED: \n#+DATE: %<%Y-%m-%d>\n"))
+        "My slip boxes. Format is a list of (capture-key name directory filename extra-template).")
+      ;; one capture template per slip-box
+      (setq org-roam-capture-templates
+            (mapcar (lambda (x)
+                      (let ((key  (nth 0 x))
+                            (name (nth 1 x))
+                            (dir  (nth 2 x))
+                            (filename (nth 3 x))
+                            (extra-template (nth 4 x)))
+                        `(,key ,name plain "%?"
+                               :if-new (file+head
+                                        ,(concat dir filename ".org")
+                                        ,(concat "#+TITLE: ${title}\n"
+                                                 extra-template))
+                               :immediate-finish t
+                               :unnarrowed t)))
+                    slip-boxes))
     
-    (defun capture-tsid (node)
-      "A hack definition to workaround that org-roam passes a node argument."
-      (tsid))
+      (defun capture-tsid (node)
+        "A hack definition to workaround that org-roam passes a node argument."
+        (tsid))
     
-    (defun org-roam-new-node (&optional keys)
-    (interactive)
-    (org-roam-capture-
-     :keys keys
-     :node (org-roam-node-create :title "")
-     :props '(:finalize find-file)))
+      (defun org-roam-new-node (&optional keys)
+      (interactive)
+      (org-roam-capture-
+       :keys keys
+       :node (org-roam-node-create :title "")
+       :props '(:finalize find-file)))
+    
+    (defun org-roam-new-node-default ()
+      (interactive)
+      (org-roam-new-node "d"))
+    
+    (defun org-roam-new-node-areas ()
+      (interactive)
+      (org-roam-new-node "a"))
+    
+    (defun move-to-slip-box (slip-box)
+    "Move file to specified SLIP-BOX."
+    (interactive (list (completing-read "Move to slip-box: "
+                                        (mapcar (lambda (x) (nth 2 x)) slip-boxes))))
+    (let* ((filename (buffer-file-name))
+           (directory (file-name-directory filename))
+           (name (file-name-nondirectory filename))
+           (new-name (f-join org-roam-directory slip-box name)))
+      (roam-rename new-name)))
   
-  (defun org-roam-new-node-default ()
-    (interactive)
-    (org-roam-new-node "d"))
+  ;; TODO: with org-roam-v2 this probably can be simplified
+  (defun roam-rename (new-name)
+    "Move file to NEW-NAME. `org-roam' takes care of adjusting all links."
+    (let ((filename (buffer-file-name)))
+      (unless filename
+        (error "Buffer '%s' is not visiting file!" (buffer-name)))
+      (rename-file filename new-name)
+      (set-visited-file-name new-name t)
+      (revert-buffer t t t)
+      ;; trigger save-buffer for org-roam to regenerate `org-roam-buffer'.
+      (set-buffer-modified-p t)
+      (save-buffer)))
   
-  (defun org-roam-new-node-areas ()
-    (interactive)
-    (org-roam-new-node "a"))
+  (setq org-roam-node-display-template "${hierarchy:*} ${tags:10}")
+  
+  (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
+    "Return the file TITLE for the node."
+    (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
+  
+  (cl-defmethod org-roam-node-hierarchy ((node org-roam-node))
+    "Return the hierarchy for the node."
+    (let ((title (org-roam-node-title node))
+          (olp (org-roam-node-olp node))
+          (level (org-roam-node-level node))
+          (directories (org-roam-node-directories node))
+          (filetitle (org-roam-node-filetitle node)))
+      (concat
+       (if directories (format "(%s) " directories))
+       (if (> level 0) (concat filetitle " > "))
+       (if (> level 1) (concat (string-join olp " > ") " > "))
+       title)))
+  
+  (cl-defmethod org-roam-node-directories ((node org-roam-node))
+    (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
+        (string-join (f-split dirs) "/")
+      nil))
+  
 #+end_src
 ** org-download
 #+begin_src emacs-lisp

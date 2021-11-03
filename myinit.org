@@ -394,7 +394,9 @@ Timestamp-ids are used to uniquely identify things.
         '(;; Default slip-box with permanent notes
           ("d" "default"     ""         "${capture-tsid}")
           ;; Areas of responsibility notes
-          ("a" "areas"        "areas/"    "${capture-tsid}")
+          ("a" "areas"        "areas/"    "${title}")
+           ;; Archive
+          ("o" "archive"        "archive/"    "${capture-tsid}")
           ;; Literature notes
           ("b" "bibliograpic" "biblio/" "${citekey}" "#+LAST_MODIFIED: \n#+DATE: %<%Y-%m-%d>\n"))
         "My slip boxes. Format is a list of (capture-key name directory filename extra-template).")
@@ -414,26 +416,26 @@ Timestamp-ids are used to uniquely identify things.
                                :immediate-finish t
                                :unnarrowed t)))
                     slip-boxes))
-    
+
       (defun capture-tsid (node)
         "A hack definition to workaround that org-roam passes a node argument."
         (tsid))
-    
+
       (defun org-roam-new-node (&optional keys)
       (interactive)
       (org-roam-capture-
        :keys keys
        :node (org-roam-node-create :title "")
        :props '(:finalize find-file)))
-    
+
     (defun org-roam-new-node-default ()
       (interactive)
       (org-roam-new-node "d"))
-    
+
     (defun org-roam-new-node-areas ()
       (interactive)
       (org-roam-new-node "a"))
-    
+
     (defun move-to-slip-box (slip-box)
     "Move file to specified SLIP-BOX."
     (interactive (list (completing-read "Move to slip-box: "
@@ -443,7 +445,7 @@ Timestamp-ids are used to uniquely identify things.
            (name (file-name-nondirectory filename))
            (new-name (f-join org-roam-directory slip-box name)))
       (roam-rename new-name)))
-  
+
   ;; TODO: with org-roam-v2 this probably can be simplified
   (defun roam-rename (new-name)
     "Move file to NEW-NAME. `org-roam' takes care of adjusting all links."
@@ -456,13 +458,13 @@ Timestamp-ids are used to uniquely identify things.
       ;; trigger save-buffer for org-roam to regenerate `org-roam-buffer'.
       (set-buffer-modified-p t)
       (save-buffer)))
-  
+
   (setq org-roam-node-display-template "${hierarchy:*} ${tags:10}")
-  
+
   (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
     "Return the file TITLE for the node."
     (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
-  
+
   (cl-defmethod org-roam-node-hierarchy ((node org-roam-node))
     "Return the hierarchy for the node."
     (let ((title (org-roam-node-title node))
@@ -475,12 +477,11 @@ Timestamp-ids are used to uniquely identify things.
        (if (> level 0) (concat filetitle " > "))
        (if (> level 1) (concat (string-join olp " > ") " > "))
        title)))
-  
+
   (cl-defmethod org-roam-node-directories ((node org-roam-node))
     (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
         (string-join (f-split dirs) "/")
       nil))
-  
 #+end_src
 ** org-download
 #+begin_src emacs-lisp

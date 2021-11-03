@@ -201,7 +201,7 @@ identifiers.
     (setq org-hide-emphasis-markers t
           org-log-done t
           org-clock-persist 'history
-          org-directory "~/org"
+          org-directory "~/Dropbox/org"
           org-agenda-files (list org-directory)
           org-outline-path-complete-in-steps nil
           org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "HOLD(h!)" "|" "DONE(d)" "CANCELLED(c)")
@@ -394,7 +394,7 @@ Timestamp-ids are used to uniquely identify things.
         '(;; Default slip-box with permanent notes
           ("d" "default"     ""         "${capture-tsid}")
           ;; Areas of responsibility notes
-          ("a" "areas"        "areas/"    "${title}")
+          ("a" "areas"        "areas/"    "${capture-tsid}")
            ;; Archive
           ("o" "archive"        "archive/"    "${capture-tsid}")
           ;; Literature notes

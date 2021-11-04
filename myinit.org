@@ -204,7 +204,7 @@ identifiers.
           org-directory "~/Dropbox/org"
           org-agenda-files (list org-directory)
           org-outline-path-complete-in-steps nil
-          org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "HOLD(h!)" "|" "DONE(d)" "CANCELLED(c)")))
+          org-todo-keywords '((sequence "IDEA(i)" "MONTH(m)" "WEEK(w)" "TODO(t)" "HOLD(h!)" "|" "DONE(d)" "FAIL(f)")))
     (add-hook 'after-init-hook (defun org-after-init ()
                                  <<org-after-init>>))
     <<my-org-modules>>
@@ -542,6 +542,7 @@ Timestamp-ids are used to uniquely identify things.
 *** prog-mode
 #+BEGIN_SRC emacs-lisp
   (add-hook 'prog-mode-hook 'whitespace-mode)
+  (add-hook 'text-mode-hook 'turn-on-auto-fill)
 #+END_SRC
 *** golang
 #+BEGIN_SRC emacs-lisp

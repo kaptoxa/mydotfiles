@@ -204,7 +204,7 @@ identifiers.
           org-directory "~/Dropbox/org"
           org-agenda-files (list org-directory)
           org-outline-path-complete-in-steps nil
-          org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "HOLD(h!)" "|" "DONE(d)" "CANCELLED(c)")))
+          org-todo-keywords '((sequence "IDEA(i)" "MONTH(m)" "WEEK(w)" "TODO(t)" "|" "DONE(d)" "FAIL(f)")))
     (add-hook 'after-init-hook (defun org-after-init ()
                                  <<org-after-init>>))
     <<my-org-modules>>

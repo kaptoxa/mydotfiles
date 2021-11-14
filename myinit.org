@@ -111,7 +111,7 @@ identifiers.
 #+NAME: my-org-capture-templates
 #+BEGIN_SRC emacs-lisp :tangle no
     (org-capture-templates `(("t" "Task to inbox" entry  (file "inbox.org")
-                              ,(concat "* TODO %?\n"
+                              ,(concat "* TODO [#A] %?\n"
                                               "/Entered on/ %U"))
                              ("i" "Idea to inbox" entry  (file "inbox.org")
                               ,(concat "* IDEA %?\n"
@@ -143,10 +143,10 @@ identifiers.
   (org-agenda-todo-ignore-scheduled 'future)
   (org-agenda-custom-commands
       '(("j" "Jedi task list"
-         ((todo "NEXT"
-                 ((org-agenda-prefix-format "  %-12:c")
-                 (org-agenda-overriding-header "\nNext to do")
-                 (org-agenda-max-entries 3)))
+         ((tags "+TODO=\"TODO\"+PRIORITY=\"A\"-PRIORITY=\"B\"-PRIORITY=\"C\""
+                 ((org-agenda-prefix-format " %i ")
+                 (org-agenda-overriding-header "\nToday")
+                 ))
           (agenda ""
                ((org-agenda-priority-down)
                ))))
@@ -204,7 +204,7 @@ identifiers.
           org-directory "~/Dropbox/org"
           org-agenda-files (list org-directory)
           org-outline-path-complete-in-steps nil
-          org-todo-keywords '((sequence "IDEA(i)" "MONTH(m)" "WEEK(w)" "TODO(t)" "HOLD(h!)" "|" "DONE(d)" "FAIL(f)")))
+          org-todo-keywords '((sequence "IDEA(i)" "TODO(t)" "HOLD(h!)" "|" "DONE(d)")))
     (add-hook 'after-init-hook (defun org-after-init ()
                                  <<org-after-init>>))
     <<my-org-modules>>

@@ -489,6 +489,24 @@ Timestamp-ids are used to uniquely identify things.
     (org-download-image-dir nil)
     (org-download-heading-lvl 3))
 #+end_src
+** org-roam-ui
+#+begin_src emacs-lisp :noweb yes
+  (use-package websocket
+      :after org-roam)
+  
+  (use-package org-roam-ui
+      :load-path "elpa/org-roam-ui"
+      :after org-roam ;; or :after org
+  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;         if you don't care about startup time, use
+  ;;  :hook (after-init . org-roam-ui-mode)
+      :config
+      (setq org-roam-ui-sync-theme t
+            org-roam-ui-follow t
+            org-roam-ui-update-on-save t
+            org-roam-ui-open-on-start t))
+#+end_src
 * helpers
 ** google translate
 #+BEGIN_SRC emacs-lisp

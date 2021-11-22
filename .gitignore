@@ -1,0 +1,13 @@
+.git/
+backups/
+elpa/
+persist/
+quelpa/
+server/
+transient/
+org-roam.db
+recentf
+bookmarks
+.org-id-locations
+custom.el
+myinit.el

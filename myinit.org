@@ -500,7 +500,7 @@ Timestamp-ids are used to uniquely identify things.
   ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
   ;;         a hookable mode anymore, you're advised to pick something yourself
   ;;         if you don't care about startup time, use
-  ;;  :hook (after-init . org-roam-ui-mode)
+      :hook (after-init . org-roam-ui-mode)
       :config
       (setq org-roam-ui-sync-theme t
             org-roam-ui-follow t
@@ -575,13 +575,3 @@ Timestamp-ids are used to uniquely identify things.
 #+BEGIN_SRC emacs-lisp
   (rassq-delete-all 'change-log-mode auto-mode-alist)
 #+END_SRC
-** org-transclusion
-#+begin_src emacs-lisp
-      (use-package org-transclusion
-          :defer t
-          :after org
-          :quelpa
-          (org-transclusion :repo "nobiot/org-transclusion" :fetcher github)
-          :init
-          (setq org-transclusion-include-first-section t))
-#+end_src

@@ -10,3 +10,5 @@ bookmarks
 .org-id-locations
 custom.el
 myinit.el
+org-roam.db
+network-security.data 

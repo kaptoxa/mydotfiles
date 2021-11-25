@@ -22,3 +22,4 @@
   (package-install 'use-package))
 
 (org-babel-load-file (expand-file-name (locate-user-emacs-file "myinit.org")))
+;;(org-babel-load-file "org-ref.org")

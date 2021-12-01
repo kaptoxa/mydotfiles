@@ -485,11 +485,11 @@ Timestamp-ids are used to uniquely identify things.
 #+end_src
 ** org-download
 #+begin_src emacs-lisp
-  (use-package org-download
-    :custom
-    (org-download-method 'directory)
-    (org-download-image-dir nil)
-    (org-download-heading-lvl nil))
+    (use-package org-download
+      :custom
+      (org-download-method 'directory)
+      (org-download-image-dir nil)
+      (org-download-heading-lvl nil))
 #+end_src
 ** org-roam-ui
 #+begin_src emacs-lisp :noweb yes

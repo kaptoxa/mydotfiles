@@ -41,7 +41,6 @@ To be able to update lists in /custom/
     (global-set-key (kbd "C-x h") 'windmove-left)
     (global-set-key (kbd "C-x l") 'windmove-right)
     (setq default-input-method 'russian-computer)
-    (global-set-key (kbd "C-q") 'toggle-input-method)
     <<narrow-commands>>
     (setq-default indent-tabs-mode nil)
     (setq show-trailing-whitespace t
@@ -545,7 +544,12 @@ Timestamp-ids are used to uniquely identify things.
             (my-command (concat toast t-title t-message t-image)))
         (call-process-shell-command my-command))))
 #+end_src
-
+** reverse-im
+#+begin_src emacs-lisp
+(use-package revers-im
+   :ensure t
+   )
+#+end_src emacs-lisp
 * modes
 ** feature-mode
 #+BEGIN_SRC emacs-lisp

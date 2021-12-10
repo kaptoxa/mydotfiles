@@ -11,7 +11,6 @@
 
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
         ("org" . "http://orgmode.org/elpa/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")))
 

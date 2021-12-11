@@ -41,7 +41,7 @@ To be able to update lists in /custom/
     (global-set-key (kbd "C-x h") 'windmove-left)
     (global-set-key (kbd "C-x l") 'windmove-right)
     (setq default-input-method 'russian-computer)
-    (global-set-key (kbd "C-q") 'toggle-input-method)
+    (global-set-key (kbd "C-q") 'toggle-input-method)  ; йахохахаху!
     <<narrow-commands>>
     (setq-default indent-tabs-mode nil)
     (setq show-trailing-whitespace t
@@ -511,18 +511,6 @@ Timestamp-ids are used to uniquely identify things.
             org-roam-ui-open-on-start t))
 #+end_src
 * helpers
-** google translate
-#+BEGIN_SRC emacs-lisp
-(require 'popup)
-(require 'google-translate)
-(require 'google-translate-default-ui)
-(global-set-key "\C-ct" 'google-translate-at-point)
-(global-set-key "\C-cT" 'google-translate-query-translate)
-(setq google-translate-default-source-language "en")
-(setq google-translate-default-target-language "ru")
-(defun google-translate--search-tkk () "Search TKK." (list 430675 2721866130))
-(setq google-translate-backend-method 'curl)
-#+END_SRC
 ** org-drill
 #+begin_src emacs-lisp
   (use-package org-drill
@@ -545,12 +533,6 @@ Timestamp-ids are used to uniquely identify things.
             (my-command (concat toast t-title t-message t-image)))
         (call-process-shell-command my-command))))
 #+end_src
-** reverse-im
-#+begin_src emacs-lisp
-(use-package revers-im
-   :ensure t
-   )
-#+end_src emacs-lisp
 * modes
 ** feature-mode
 #+BEGIN_SRC emacs-lisp

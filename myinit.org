@@ -41,7 +41,7 @@ To be able to update lists in /custom/
     (global-set-key (kbd "C-x h") 'windmove-left)
     (global-set-key (kbd "C-x l") 'windmove-right)
     (setq default-input-method 'russian-computer)
-    (global-set-key (kbd "C-q") 'toggle-input-method)  ; йахохахаху!
+    (global-set-key (kbd "C-q") 'toggle-input-method)
     <<narrow-commands>>
     (setq-default indent-tabs-mode nil)
     (setq show-trailing-whitespace t

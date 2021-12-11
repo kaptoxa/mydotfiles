@@ -23,7 +23,7 @@ if (  !State
    && (StartTime = 0)) {
   StartTime := A_TickCount
 }
-выаываывsdfsdfsdfsdfываываываsdfsdfsdf
+
 KeyWait, CapsLock
 Send {LControl Up}
 IniRead, condEscape, %A_ScriptDir%\Settings.ini, CapsUnlocked, TapEscape, 1

@@ -338,11 +338,6 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
         '((?f "Find file" project-find-file)
           (?g "Magit status" magit-status))))
 #+end_src
-** emacs-everywhere
-#+begin_src emacs-lisp
-  (use-package emacs-everywhere
-    :ensure t)
-#+end_src
 ** helpers
 Emacs lisp helper functions.
 

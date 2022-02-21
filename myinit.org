@@ -284,6 +284,10 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
    (lambda (&rest r) (org-block-map #'aragaer/show-nohide))
    '((name . "show-nohide")))
 #+end_src
+** auto-saving
+#+begin_src emacs-lisp
+(add-hook 'auto-save-hook 'org-save-all-org-buffers)
+#+end_src
 * utils
 ** which-key
 #+BEGIN_SRC emacs-lisp

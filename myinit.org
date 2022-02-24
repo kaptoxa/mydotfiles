@@ -185,7 +185,7 @@ identifiers.
     :init
     (setq org-publish-project-alist
       '(("org"
-         :base-directory "~/Dropbox/roam/literature/"
+         :base-directory "~/roam/literature"
          :publishing-function org-html-publish-to-html
          :publishing-directory "~/kaptoxa.github.io/"
          :section-numbers nil
@@ -284,6 +284,10 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
    (lambda (&rest r) (org-block-map #'aragaer/show-nohide))
    '((name . "show-nohide")))
 #+end_src
+** auto-saving
+#+begin_src emacs-lisp
+(add-hook 'auto-save-hook 'org-save-all-org-buffers)
+#+end_src
 * utils
 ** which-key
 #+BEGIN_SRC emacs-lisp
@@ -350,6 +354,7 @@ Timestamp-ids are used to uniquely identify things.
 ** org-roam
 #+begin_src emacs-lisp :noweb yes
     (use-package org-roam
+      :load-path "elpa/org-roam"
       :ensure t
       :init
       (setq org-roam-v2-ack t)
@@ -365,8 +370,8 @@ Timestamp-ids are used to uniquely identify things.
   ;
   ;           :unnarrowed t)))
       :config
-      (setq org-roam-directory (file-truename "~/Dropbox/roam"))
-      (setq org-roam-dailes-directory (file-truename "~/Dropbox/roam/daily/"))
+      (setq org-roam-directory (file-truename "~/roam"))
+      (setq org-roam-dailes-directory (file-truename "~/roam/daily/"))
       <<org-roam-slip-boxes>>
       :hook
       (after-init . org-roam-setup)

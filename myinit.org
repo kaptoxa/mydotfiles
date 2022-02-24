@@ -185,7 +185,7 @@ identifiers.
     :init
     (setq org-publish-project-alist
       '(("org"
-         :base-directory "~/Dropbox/roam/"
+         :base-directory "~/Dropbox/roam/literature/"
          :publishing-function org-html-publish-to-html
          :publishing-directory "~/kaptoxa.github.io/"
          :section-numbers nil
@@ -394,7 +394,7 @@ Timestamp-ids are used to uniquely identify things.
            ;; Archive
           ("o" "archive"        "archive/"    "${capture-tsid}")
           ;; Literature notes
-          ("b" "bibliograpic" "biblio/" "${citekey}" "#+LAST_MODIFIED: \n#+DATE: %<%Y-%m-%d>\n"))
+          ("l" "literature" "literature/" "${citekey}" "#+LAST_MODIFIED: \n#+DATE: %<%Y-%m-%d>\n"))
         "My slip boxes. Format is a list of (capture-key name directory filename extra-template).")
       ;; one capture template per slip-box
       (setq org-roam-capture-templates

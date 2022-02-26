@@ -130,32 +130,32 @@ identifiers.
 *** agenda custom
 #+NAME: agenda-custom
 #+BEGIN_SRC emacs-lisp :tangle no
-      (org-agenda-span 1)
-      (org-sort-agenda-notime-is-late nil)
-      (org-agenda-tags-todo-honor-ignore-options t)
-      (org-agenda-todo-ignore-time-comparison-use-seconds t)
-      (org-agenda-skip-scheduled-if-done t)
-      (org-priority-default 65)
-      (org-agenda-time-grid
-       '(nil
-         (800 1000 1200 1400 1600 1800 2000)
-         "......" "----------------"))
-      (оrg-agenda-todo-ignore-timestamp 'future)
-      (org-agenda-todo-ignore-scheduled 'future)
-      (org-agenda-custom-commands
-          '(("j" "Jedi task list"
-             ((tags-todo "TODO=\"TODO\"+PRIORITY=\"A\""
-                     ((org-agenda-prefix-format "  %-12:c")
-                     (org-agenda-overriding-header "\nToday")
-                     (org-agenda-todo-ignore-scheduled 'all)
-                     ))
-              (agenda ""
-                   ((org-agenda-priority-down)
-                   ))
-              (tags "Closed>=\"<today>\""
-                        ((org-agenda-prefix-format "  %?-12t% s")
-                        (org-agenda-overriding-header "Done")))))
-            ))
+  (org-agenda-span -1)
+  (org-sort-agenda-notime-is-late nil)
+  (org-agenda-tags-todo-honor-ignore-options t)
+  (org-agenda-todo-ignore-time-comparison-use-seconds t)
+  (org-agenda-skip-scheduled-if-done t)
+  (org-priority-default 65)
+  (org-agenda-time-grid
+   '(nil
+     (800 1000 1200 1400 1600 1800 2000)
+     "......" "----------------"))
+  (оrg-agenda-todo-ignore-timestamp 'future)
+  (org-agenda-todo-ignore-scheduled 'future)
+  (org-agenda-custom-commands
+      '(("j" "Jedi task list"
+         ((tags-todo "TODO=\"TODO\"+PRIORITY=\"A\""
+                ((org-agenda-prefix-format " %i %-12(aragaer/agenda-category) ")
+                 (org-agenda-overriding-header "\nToday")
+                 (org-agenda-todo-ignore-scheduled 'all)
+                 ))
+          (agenda ""
+               ((org-agenda-priority-down)
+               ))
+          (tags "Closed>=\"<today>\""
+                    ((org-agenda-prefix-format "  %?-12t% s")
+                    (org-agenda-overriding-header "Done")))))
+        ))
 #+END_SRC
 ** bind
 #+NAME: org-bind-keys
@@ -284,6 +284,37 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
    (lambda (&rest r) (org-block-map #'aragaer/show-nohide))
    '((name . "show-nohide")))
 #+end_src
+** titles in angenda
+#+begin_src emacs-lisp
+(defun aragaer/agenda-category ()
+  "Get category of item at point for agenda.
+
+Category is defined by one of the following items:
+
+- CATEGORY property
+- TITLE keyword or property for org-roam nodes
+- filename without directory and extension
+
+Usage example:
+
+  (setq org-agenda-prefix-format
+        '((agenda . \" %(aragaer/agenda-category) %?-12t %12s\")))
+
+Refer to `org-agenda-prefix-format' for more information."
+  (let ((file-name (when buffer-file-name
+                     (file-name-sans-extension
+                      (file-name-nondirectory buffer-file-name))))
+        (parent-title (when (org-roam-buffer-p)
+                        (save-excursion
+                          (org-up-heading-or-point-min)
+                          (org-roam-node-title (org-roam-node-at-point)))))
+        (category (org-get-category)))
+    (if (and parent-title
+             (string-equal category file-name))
+        parent-title
+      (or category ""))))
+
+#+end_src
 ** auto-saving
 #+begin_src emacs-lisp
 (add-hook 'auto-save-hook 'org-save-all-org-buffers)
@@ -395,6 +426,8 @@ Timestamp-ids are used to uniquely identify things.
         '(;; Default slip-box with permanent notes
           ("d" "default"     ""         "${capture-tsid}")
           ;; Areas of responsibility notes
+          ("p" "projects"        "projects/"    "${capture-tsid}")
+           ;; Archive
           ("a" "areas"        "areas/"    "${capture-tsid}")
            ;; Archive
           ("o" "archive"        "archive/"    "${capture-tsid}")

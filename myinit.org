@@ -286,33 +286,90 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
 #+end_src
 ** titles in angenda
 #+begin_src emacs-lisp
-(defun aragaer/agenda-category ()
-  "Get category of item at point for agenda.
+  (setq org-tags-exclude-from-inheritance
+        (append '("project" "next" "agenda" "here")
+                org-tags-exclude-from-inheritance))
 
-Category is defined by one of the following items:
+  (defun vulpea-project-p ()
+    "Return non-nil if current buffer has any todo entry.
 
-- CATEGORY property
-- TITLE keyword or property for org-roam nodes
-- filename without directory and extension
+  TODO entries marked as done are ignored, meaning the this
+  function returns nil if current buffer contains only completed
+  tasks."
+    (org-element-map
+        (org-element-parse-buffer 'headline)
+        'headline
+      (lambda (h)
+        (eq (org-element-property :todo-type h)
+            'todo))
+      nil 'first-match))
 
-Usage example:
+  (defun aragaer/add-to-agenda-maybe ()
+    (unless (member (buffer-file-name) (org-agenda-files))
+      (org-agenda-file-to-front)))
 
-  (setq org-agenda-prefix-format
-        '((agenda . \" %(aragaer/agenda-category) %?-12t %12s\")))
+  (defun aragaer/remove-from-agenda-maybe ()
+    (if (member (buffer-file-name) (org-agenda-files))
+        (org-remove-file)))
 
-Refer to `org-agenda-prefix-format' for more information."
-  (let ((file-name (when buffer-file-name
-                     (file-name-sans-extension
-                      (file-name-nondirectory buffer-file-name))))
-        (parent-title (when (org-roam-buffer-p)
-                        (save-excursion
-                          (org-up-heading-or-point-min)
-                          (org-roam-node-title (org-roam-node-at-point)))))
-        (category (org-get-category)))
-    (if (and parent-title
-             (string-equal category file-name))
-        parent-title
-      (or category ""))))
+  (defun aragaer/get-filetags ()
+    (split-string (or (cadr (assoc "FILETAGS"
+                                   (org-collect-keywords '("filetags"))))
+                      "")
+                  ":" 'omit-nulls))
+
+  (defun aragaer/project-update-tag ()
+    "Update PROJECT tag in the current buffer."
+    (let ((tags (aragaer/get-filetags)))
+      (if (vulpea-project-p)
+          (unless (member "project" tags)
+            (org-roam-tag-add '("project")))
+        (when (member "project" tags)
+          (org-roam-tag-remove '("project"))))))
+
+  (defun aragaer/update-agenda ()
+    "Add or remove roam file to agenda."
+    (when (and (not (active-minibuffer-window))
+               (org-roam-buffer-p))
+      (save-excursion
+        (goto-char (point-min))
+        (aragaer/project-update-tag)
+        (let ((tags (aragaer/get-filetags)))
+          (if (or (member "agenda" tags)
+                  (member "project" tags))
+              (aragaer/add-to-agenda-maybe)
+            (aragaer/remove-from-agenda-maybe))))))
+
+  (add-hook 'find-file-hook #'aragaer/update-agenda)
+  (add-hook 'before-save-hook #'aragaer/update-agenda)
+
+    (defun aragaer/agenda-category ()
+      "Get category of item at point for agenda.
+
+    Category is defined by one of the following items:
+
+    - CATEGORY property
+    - TITLE keyword or property for org-roam nodes
+    - filename without directory and extension
+
+    Usage example:
+
+      (setq org-agenda-prefix-format
+            '((agenda . \" %(aragaer/agenda-category) %?-12t %12s\")))
+
+    Refer to `org-agenda-prefix-format' for more information."
+      (let ((file-name (when buffer-file-name
+                         (file-name-sans-extension
+                          (file-name-nondirectory buffer-file-name))))
+            (parent-title (when (org-roam-buffer-p)
+                            (save-excursion
+                              (org-up-heading-or-point-min)
+                              (org-roam-node-title (org-roam-node-at-point)))))
+            (category (org-get-category)))
+        (if (and parent-title
+                 (string-equal category file-name))
+            parent-title
+          (or category ""))))
 
 #+end_src
 ** auto-saving

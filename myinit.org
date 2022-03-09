@@ -202,9 +202,8 @@ identifiers.
     (setq org-hide-emphasis-markers t
           org-log-done t
           org-clock-persist 'history
-          org-directory "~/Dropbox/org"
-          org-roam-projects "~/roam/projects"
-          org-agenda-files (list org-directory org-roam-projects)
+          org-directory "~/roam/projects"
+          org-agenda-files (list org-directory)
           org-outline-path-complete-in-steps nil
           org-todo-keywords '((sequence "TODO(t)" "HOLD(h!)" "|" "DONE(d)")
                               (sequence "IDEA(i)" "PROJ(p!)" "|" "WIN(w)")))

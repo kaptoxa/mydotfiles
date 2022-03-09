@@ -376,6 +376,14 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
 (add-hook 'auto-save-hook 'org-save-all-org-buffers)
 #+end_src
 * utils
+** crypt
+#+begin_src emacs-lisp
+(require 'org-crypt)
+(org-crypt-use-before-save-magic)
+(add-to-list 'org-tags-exclude-from-inheritance "crypt")
+(setq org-crypt-key "alex.blednov@gmail.com")
+(add-hook 'org-babel-pre-tangle-hook 'org-decrypt-entries t)
+#+end_src
 ** which-key
 #+BEGIN_SRC emacs-lisp
   (use-package which-key

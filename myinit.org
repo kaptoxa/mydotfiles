@@ -145,7 +145,7 @@ identifiers.
   (org-agenda-custom-commands
       '(("j" "Jedi task list"
          ((tags-todo "TODO=\"TODO\"+PRIORITY=\"A\""
-                ((org-agenda-prefix-format " %i %-12(aragaer/agenda-category) ")
+                ((org-agenda-prefix-format " %i %-18(aragaer/agenda-category) ")
                  (org-agenda-overriding-header "\nToday")
                  (org-agenda-todo-ignore-scheduled 'all)
                  ))
@@ -153,7 +153,7 @@ identifiers.
                ((org-agenda-priority-down)
                ))
           (tags "Closed>=\"<today>\""
-                    ((org-agenda-prefix-format "  %?-12t% s")
+                    ((org-agenda-prefix-format "  %?-18t% s")
                     (org-agenda-overriding-header "Done")))))
         ))
 #+END_SRC

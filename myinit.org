@@ -174,66 +174,66 @@ identifiers.
 #+end_src
 ** use package
 #+BEGIN_SRC emacs-lisp :noweb yes
-  (use-package org
-;    :ensure org-plus-contrib
-    :load-path "elpa/org-9.5"
-    :init
-    <<vimacs/subtree>>
-    :bind
-    <<org-bind-keys>>
-    :mode ("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode)
-    :init
-    (setq org-publish-project-alist
-      '(("org"
-         :base-directory "~/roam/literature"
-         :publishing-function org-html-publish-to-html
-         :publishing-directory "~/kaptoxa.github.io/"
-         :section-numbers nil
-         :with-toc 2
-         :headline-levels 1
-         :viewport nil
-         :with-date nil
-         :with-author 1
-         :with-fixed-width 80
-         :with-emphasize 1
-         :style "<link rel=\"stylesheet\"
-                href=\"style.css\"
-                type=\"text/css\"/>")))
-    (setq org-hide-emphasis-markers t
-          org-log-done t
-          org-clock-persist 'history
-          org-directory "~/roam/projects"
-          org-agenda-files (list org-directory)
-          org-outline-path-complete-in-steps nil
-          org-todo-keywords '((sequence "TODO(t)" "HOLD(h!)" "|" "DONE(d)")
-                              (sequence "IDEA(i)" "PROJ(p!)" "|" "WIN(w)")))
-    (add-hook 'after-init-hook (defun org-after-init ()
-                                 <<org-after-init>>))
-    <<my-org-modules>>
-    :config
-    (org-load-modules-maybe t)
-    (unbind-key "C-'" org-mode-map) ; Free this one for avy
-    :custom
-    <<org-habits-custom>>
-    <<agenda-custom>>
-    <<my-org-capture-templates>>
-    (org-use-sub-superscripts nil)
-    (org-blank-before-new-entry '((heading . nil) (plain-list-item . nil)))
-    (org-confirm-babel-evaluate nil)
-    (org-enforce-todo-dependencies t)
-    (org-extend-today-until 3)
-    (org-hide-leading-stars t)
-    (org-log-into-drawer "LOGBOOK")
-    (org-outline-path-complete-in-steps nil)
-    (org-refile-use-outline-path 'file)
-    (org-archive-location "archive/%s::")
-    (org-return-follows-link t)
-    (org-hide-blocks-startup t)
-    (org-refile-targets
-     '((nil :maxlevel . 3)
-       (org-agenda-files :maxlevel . 3)))
-    :custom-face
-    (org-mode-line-clock ((t (:background "grey75" :foreground "red" :box (:line-width -1 :style released-button))))))
+    (use-package org
+  ;    :ensure org-plus-contrib
+      :load-path "elpa/org-9.5"
+      :init
+      <<vimacs/subtree>>
+      :bind
+      <<org-bind-keys>>
+      :mode ("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode)
+      :init
+      (setq org-publish-project-alist
+        '(("org"
+           :base-directory "~/roam/literature"
+           :publishing-function org-html-publish-to-html
+           :publishing-directory "~/kaptoxa.github.io/"
+           :section-numbers nil
+           :with-toc 2
+           :headline-levels 1
+           :viewport nil
+           :with-date nil
+           :with-author 1
+           :with-fixed-width 80
+           :with-emphasize 1
+           :style "<link rel=\"stylesheet\"
+                  href=\"style.css\"
+                  type=\"text/css\"/>")))
+      (setq org-hide-emphasis-markers t
+            org-log-done t
+            org-clock-persist 'history
+            org-agenda-files (directory-files-recursively "~/roam/projects" "\\.org$")
+            org-directory "~/roam/projects"
+            org-outline-path-complete-in-steps nil
+            org-todo-keywords '((sequence "TODO(t)" "HOLD(h!)" "|" "DONE(d)")
+                                (sequence "IDEA(i)" "PROJ(p!)" "|" "WIN(w)")))
+      (add-hook 'after-init-hook (defun org-after-init ()
+                                   <<org-after-init>>))
+      <<my-org-modules>>
+      :config
+      (org-load-modules-maybe t)
+      (unbind-key "C-'" org-mode-map) ; Free this one for avy
+      :custom
+      <<org-habits-custom>>
+      <<agenda-custom>>
+      <<my-org-capture-templates>>
+      (org-use-sub-superscripts nil)
+      (org-blank-before-new-entry '((heading . nil) (plain-list-item . nil)))
+      (org-confirm-babel-evaluate nil)
+      (org-enforce-todo-dependencies t)
+      (org-extend-today-until 3)
+      (org-hide-leading-stars t)
+      (org-log-into-drawer "LOGBOOK")
+      (org-outline-path-complete-in-steps nil)
+      (org-refile-use-outline-path 'file)
+      (org-archive-location "archive/%s::")
+      (org-return-follows-link t)
+      (org-hide-blocks-startup t)
+      (org-refile-targets
+       '((nil :maxlevel . 3)
+         (org-agenda-files :maxlevel . 1)))
+      :custom-face
+      (org-mode-line-clock ((t (:background "grey75" :foreground "red" :box (:line-width -1 :style released-button))))))
 #+END_SRC
 ** calendar
 #+BEGIN_SRC emacs-lisp

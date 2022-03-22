@@ -335,8 +335,7 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
         (goto-char (point-min))
         (aragaer/project-update-tag)
         (let ((tags (aragaer/get-filetags)))
-          (if (or (member "agenda" tags)
-                  (member "project" tags))
+          (if (member "project" tags)
               (aragaer/add-to-agenda-maybe)
             (aragaer/remove-from-agenda-maybe))))))
 
@@ -655,3 +654,11 @@ Timestamp-ids are used to uniquely identify things.
 #+BEGIN_SRC emacs-lisp
   (rassq-delete-all 'change-log-mode auto-mode-alist)
 #+END_SRC
+* themes
+** zenburn
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+(load-theme 'zenburn t)
+#+END_SRC
+
+

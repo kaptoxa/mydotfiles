@@ -202,8 +202,8 @@ identifiers.
       (setq org-hide-emphasis-markers t
             org-log-done t
             org-clock-persist 'history
-            org-agenda-files (directory-files-recursively "~/roam/projects" "\\.org$")
             org-directory "~/roam/projects"
+            org-agenda-files (list org-directory "~/roam/areas")
             org-outline-path-complete-in-steps nil
             org-todo-keywords '((sequence "TODO(t)" "HOLD(h!)" "|" "DONE(d)")
                                 (sequence "IDEA(i)" "PROJ(p!)" "|" "WIN(w)")))
@@ -383,7 +383,7 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
 (require 'org-crypt)
 (org-crypt-use-before-save-magic)
 (add-to-list 'org-tags-exclude-from-inheritance "crypt")
-(setq org-crypt-key "alex.blednov@gmail.com")
+(setq org-crypt-key "kaptoxa@mail.ru")
 (add-hook 'org-babel-pre-tangle-hook 'org-decrypt-entries t)
 #+end_src
 ** which-key

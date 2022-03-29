@@ -378,6 +378,10 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
 (add-hook 'auto-save-hook 'org-save-all-org-buffers)
 #+end_src
 * utils
+** f
+#+begin_src emacs-lisp
+(require 'f)
+#+end_src
 ** crypt
 #+begin_src emacs-lisp
 (require 'org-crypt)

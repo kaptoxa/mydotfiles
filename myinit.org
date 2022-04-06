@@ -61,14 +61,14 @@ To be able to update lists in /custom/
 * paths
 ** backups
 #+BEGIN_SRC emacs-lisp
-  (use-package files
-    :custom
-    (backup-directory-alist
-     `(("." . ,(locate-user-emacs-file "backups"))))
-    (auto-save-file-name-transforms
-     `((".*" ,(locate-user-emacs-file "backups") t)))
-    (auto-save-list-file-prefix
-     (locate-user-emacs-file "backups/")))
+      (use-package files
+        :custom
+        (backup-directory-alist
+         `(("." . ,(locate-user-emacs-file "backups"))))
+        (auto-save-file-name-transforms
+         `((".*" ,(locate-user-emacs-file "backups") t)))
+        (auto-save-list-file-prefix
+         (locate-user-emacs-file "backups/")))
 #+END_SRC
 ** custom
 #+BEGIN_SRC emacs-lisp
@@ -102,9 +102,11 @@ identifiers.
 #+END_SRC
 ** undo-tree
 #+begin_src emacs-lisp
-  (use-package undo-tree
-    :ensure t
-    :config (global-undo-tree-mode t))
+      (use-package undo-tree
+        :ensure t
+        :config (global-undo-tree-mode t)
+        :init
+        (setq undo-tree-history-directory-alist "~/undo-trees"))
 #+end_src
 * org
 ** capture templates
@@ -130,7 +132,7 @@ identifiers.
 *** agenda custom
 #+NAME: agenda-custom
 #+BEGIN_SRC emacs-lisp :tangle no
-  (org-agenda-span -1)
+  (org-agenda-span 1)
   (org-sort-agenda-notime-is-late nil)
   (org-agenda-tags-todo-honor-ignore-options t)
   (org-agenda-todo-ignore-time-comparison-use-seconds t)
@@ -202,8 +204,8 @@ identifiers.
       (setq org-hide-emphasis-markers t
             org-log-done t
             org-clock-persist 'history
-            org-agenda-files (directory-files-recursively "~/roam/projects" "\\.org$")
             org-directory "~/roam/projects"
+            org-agenda-files (list org-directory "~/roam/areas")
             org-outline-path-complete-in-steps nil
             org-todo-keywords '((sequence "TODO(t)" "HOLD(h!)" "|" "DONE(d)")
                                 (sequence "IDEA(i)" "PROJ(p!)" "|" "WIN(w)")))
@@ -370,7 +372,6 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
                    (string-equal category file-name))
               parent-title
             (or category ""))))
-
 #+end_src
 ** auto-saving
 #+begin_src emacs-lisp
@@ -382,7 +383,7 @@ wrapped in blocks should be visible. For that I use ':wrap nohide'.
 (require 'org-crypt)
 (org-crypt-use-before-save-magic)
 (add-to-list 'org-tags-exclude-from-inheritance "crypt")
-(setq org-crypt-key "alex.blednov@gmail.com")
+(setq org-crypt-key "kaptoxa@mail.ru")
 (add-hook 'org-babel-pre-tangle-hook 'org-decrypt-entries t)
 #+end_src
 ** which-key

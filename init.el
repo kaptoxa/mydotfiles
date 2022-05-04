@@ -10,9 +10,9 @@
 (require 'package)
 
 (setq package-archives
-      '(("gnu" . "http://elpa.gnu.org/packages/")
-	("elpa" . "http://tromey.com/elpa/")
-        ("org" . "http://orgmode.org/elpa/")
+      '(("gnu" . "https://elpa.gnu.org/packages/")
+	("elpa" . "https://tromey.com/elpa/")
+        ("org" . "https://orgmode.org/elpa/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
 (package-initialize)

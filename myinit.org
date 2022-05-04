@@ -105,8 +105,9 @@ identifiers.
       (use-package undo-tree
         :ensure t
         :config (global-undo-tree-mode t)
-        :init
-        (setq undo-tree-history-directory-alist "~/undo-trees"))
+        :custom
+        (undo-tree-history-directory-alist
+         `(("." . ,(locate-user-emacs-file "undo-trees")))))
 #+end_src
 * org
 ** capture templates
@@ -470,6 +471,9 @@ Timestamp-ids are used to uniquely identify things.
   ;           :if-new (file+head "%<%Y%m%d%H%M%S>.org" "#+title: ${title}")
   ;
   ;           :unnarrowed t)))
+      (setq org-roam-db-node-include-function
+        (lambda ()
+          (not (member "drill" (org-get-tags)))))
       :config
       (setq org-roam-directory (file-truename "~/roam"))
       (setq org-roam-dailes-directory (file-truename "~/roam/daily/"))
@@ -496,7 +500,7 @@ Timestamp-ids are used to uniquely identify things.
         '(;; Default slip-box with permanent notes
           ("d" "default"     ""         "${capture-tsid}")
           ;; Areas of responsibility notes
-          ("p" "projects"        "projects/"    "${citekey}" "#+LAST_MODIFIED: \n#+DATE: %<%Y-%m-%d>\n")
+          ("p" "projects"        "projects/"    "${citekey}")
            ;; Archive
           ("a" "areas"        "areas/"    "${capture-tsid}")
            ;; Archive
@@ -597,9 +601,13 @@ Timestamp-ids are used to uniquely identify things.
 #+end_src
 ** org-roam-ui
 #+begin_src emacs-lisp :noweb yes
+  (use-package simple-httpd
+      :ensure nil
+      :pin elpa)
+
   (use-package websocket
       :after org-roam)
-  
+
   (use-package org-roam-ui
       :load-path "elpa/org-roam-ui"
       :after org-roam ;; or :after org

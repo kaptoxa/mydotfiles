@@ -208,8 +208,8 @@ identifiers.
             org-directory "~/roam/projects"
             org-agenda-files (list org-directory "~/roam/areas")
             org-outline-path-complete-in-steps nil
-            org-todo-keywords '((sequence "TODO(t)" "HOLD(h!)" "|" "DONE(d)")
-                                (sequence "IDEA(i)" "PROJ(p!)" "|" "WIN(w)")))
+            org-todo-keywords '((sequence "TODO(t)" "HOLD(h!)" "|" "DONE(d)" "CANCELLED(c)")
+                                (sequence "IDEA(i)" "PROJ(p!)" "|" "WIN(w)" "FAIL(f)")))
       (add-hook 'after-init-hook (defun org-after-init ()
                                    <<org-after-init>>))
       <<my-org-modules>>

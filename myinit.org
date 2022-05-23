@@ -132,7 +132,7 @@ identifiers.
 *** agenda custom
 #+NAME: agenda-custom
 #+BEGIN_SRC emacs-lisp :tangle no
-  (org-agenda-span -1)
+  (org-agenda-span 1)
   (org-sort-agenda-notime-is-late nil)
   (org-agenda-tags-todo-honor-ignore-options t)
   (org-agenda-todo-ignore-time-comparison-use-seconds t)

@@ -366,43 +366,44 @@ Timestamp-ids are used to uniquely identify things.
 #+end_src
 ** org-roam
 #+begin_src emacs-lisp :noweb yes
-    (use-package org-roam
-      :load-path "elpa/org-roam"
-      :ensure t
-      :init
-      (setq org-roam-v2-ack t)
-      (setq org-roam-dailies-capture-templates
-        '(("d" "default" entry
-           "* %?"
-           :if-new (file+head "%<%Y-%m-%d>.org"
-                              "#+title: %<%Y-%m-%d>\n"))))
-  ;    (setq org-roam-capture-templates
-  ;        '(("d" "default" plain
-  ;           "%?"
-  ;           :if-new (file+head "%<%Y%m%d%H%M%S>.org" "#+title: ${title}")
-  ;
-  ;           :unnarrowed t)))
-      (setq org-roam-db-node-include-function
-        (lambda ()
-          (not (member "drill" (org-get-tags)))))
-      :config
-      (setq org-roam-directory (file-truename "~/roam"))
-      (setq org-roam-dailes-directory (file-truename "~/roam/daily/"))
-      <<org-roam-slip-boxes>>
-      :hook
-      (after-init . org-roam-setup)
-      :custom
-      (org-roam-db-update-method 'immediate)
-      :bind ((("C-c n l" . org-roam-buffer-toggle)
-              ("C-c n c" . org-roam-capture)
-              ("C-c n f" . org-roam-node-find)
-              ("C-c n n" . org-roam-new-node)
-              ("C-c n d" . org-roam-new-node-default)
-              ("C-c n a" . org-roam-new-node-areas)
-              ("C-c n j" . org-roam-dailies-capture-today))
-             :map org-mode-map
-             (("C-c n i" . org-roam-node-insert)
-              )))
+      (use-package org-roam
+        :load-path "elpa/org-roam"
+        :ensure t
+        :init
+        (setq org-roam-v2-ack t)
+        (setq org-roam-dailies-capture-templates
+          '(("d" "default" entry
+             "* %?"
+             :if-new (file+head "%<%Y-%m-%d>.org"
+                                "#+title: %<%Y-%m-%d>\n"))))
+        (setq org-roam-capture-templates
+            '(("d" "default" plain
+               "%? #+filetags: fuss"
+              :if-new (file+head "%<%Y%m%d%H%M%S>.org" "#+title: ${title}")
+              :unnarrowed t)))
+        (setq org-roam-db-node-include-function
+          (lambda ()
+            (not (member "drill" (org-get-tags)))))
+        :config
+        (setq org-roam-directory (file-truename "~/roam"))
+        (setq org-roam-dailes-directory (file-truename "~/roam/daily/"))
+        (require 'org-roam-dailies)
+        <<org-roam-slip-boxes>>
+        :hook
+        (after-init . org-roam-setup)
+        :custom
+        (org-roam-db-update-method 'immediate)
+        :bind ((("C-c n l" . org-roam-buffer-toggle)
+                ("C-c n c" . org-roam-capture)
+                ("C-c n f" . org-roam-node-find)
+                ("C-c n n" . org-roam-new-node)
+                ("C-c n d" . org-roam-new-node-default)
+                ("C-c n a" . org-roam-new-node-areas)
+  ;              ("C-c n j" . org-roam-dailies-capture-today))
+              ("C-c j" . org-roam-dailies-map))
+               :map org-mode-map
+               (("C-c n i" . org-roam-node-insert)
+                )))
 #+end_src
 ** org-roam-slip-boxes
 #+name: org-roam-slip-boxes
@@ -537,6 +538,18 @@ Timestamp-ids are used to uniquely identify things.
     :custom
     (org-drill-learn-fraction 0.3))
 #+end_src
+** org-fc
+#+begin_src emacs-lisp
+  (use-package hydra
+    :ensure t)
+
+  (use-package org-fc
+    :load-path "~/.emacs.d/elpa/org-fc"
+    :custom (org-fc-directories '("~/roam/"))
+    :config
+    (require 'org-fc-hydra))
+#+end_src
+
 ** org-pomodoro
 #+begin_src emacs-lisp
 (use-package org-pomodoro
@@ -585,11 +598,10 @@ Timestamp-ids are used to uniquely identify things.
 #+BEGIN_SRC emacs-lisp
   (rassq-delete-all 'change-log-mode auto-mode-alist)
 #+END_SRC
-* themes
-** zenburn
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-(load-theme 'zenburn t)
-#+END_SRC
-
-
+* unfill
+#+begin_src emacs-lisp
+(use-package unfill
+  :ensure t
+  :bind
+  (("C-c u p" . unfill-paragraph)))
+#+end_src

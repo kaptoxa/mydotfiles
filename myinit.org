@@ -366,51 +366,46 @@ Timestamp-ids are used to uniquely identify things.
 #+end_src
 ** org-roam
 #+begin_src emacs-lisp :noweb yes
-  (use-package org-roam
-    :load-path "elpa/org-roam"
-    :ensure t
-    :init
-    (setq org-roam-v2-ack t)
-    (setq org-roam-dailies-capture-templates
-      '(("d" "default" entry
-         "* %?"
-         :if-new (file+head "%<%Y-%m-%d>.org"
-                            "#+title: %<%Y-%m-%d>\n"))))
-    (setq org-roam-capture-templates
-        '(("d" "default" plain
-           "%? #+filetags: fuss"
-          :if-new (file+head "%<%Y%m%d%H%M%S>.org" "#+title: ${title}")
-          :unnarrowed t)))
-    (setq org-roam-db-node-include-function
-      (lambda ()
-        (not (member "drill" (org-get-tags)))))
-    :config
-    (setq org-roam-directory (file-truename "~/roam"))
-    (setq org-roam-dailes-directory (file-truename "~/roam/daily/"))
-    (require 'org-roam-dailies)
-    <<org-roam-slip-boxes>>
-    :hook
-    (after-init . org-roam-setup)
-    :custom
-    (org-roam-db-update-method 'immediate)
-    :bind ((("C-c n l" . org-roam-buffer-toggle)
-            ("C-c n c" . org-roam-capture)
-            ("C-c n f" . org-roam-node-find)
-            ("C-c n n" . org-roam-new-node)
-            ("C-c n d" . org-roam-new-node-default)
-            ("C-c n a" . org-roam-new-node-areas)
-            ("C-c n j" . org-roam-dailies-capture-today)
-            ("C-c j" . org-roam-dailies-map))
-           :map org-mode-map
-           (("C-c n i" . org-roam-node-insert)
-            )))
+    (use-package org-roam
+      :load-path "elpa/org-roam"
+      :ensure t
+      :init
+      (setq org-roam-v2-ack t)
+      (setq org-roam-dailies-capture-templates
+        '(("d" "default" entry
+           "* %?"
+           :if-new (file+head "%<%Y-%m-%d>.org"
+                              "#+title: %<%Y-%m-%d>\n#+filetags: daily"))))
+      (setq org-roam-db-node-include-function
+        (lambda ()
+          (not (member "drill" (org-get-tags)))))
+      :config
+      (setq org-roam-directory (file-truename "~/roam"))
+      (setq org-roam-dailes-directory (file-truename "~/roam/daily/"))
+      (require 'org-roam-dailies)
+      <<org-roam-slip-boxes>>
+      :hook
+      (after-init . org-roam-setup)
+      :custom
+      (org-roam-db-update-method 'immediate)
+      :bind ((("C-c n l" . org-roam-buffer-toggle)
+              ("C-c n c" . org-roam-capture)
+              ("C-c n f" . org-roam-node-find)
+              ("C-c n n" . org-roam-new-node)
+              ("C-c n d" . org-roam-new-node-default)
+              ("C-c n a" . org-roam-new-node-areas)
+              ("C-c n j" . org-roam-dailies-capture-today)
+              ("C-c j" . org-roam-dailies-map))
+             :map org-mode-map
+             (("C-c n i" . org-roam-node-insert)
+              )))
 #+end_src
 ** org-roam-slip-boxes
 #+name: org-roam-slip-boxes
 #+begin_src emacs-lisp :tangle no
       (defconst slip-boxes
         '(;; Default slip-box with permanent notes
-          ("d" "default"     ""         "${capture-tsid}")
+          ("d" "default"     ""         "${capture-tsid}" "#+filetags: fuss")
            ;; Archive
           ("a" "areas"        "areas/"    "${citekey}")
            ;; Archive
